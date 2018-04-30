@@ -38,7 +38,8 @@ public class UrlBuilder {
             return mRootUrl;
         } else {
             StringBuilder sb = new StringBuilder(mRootUrl);
-            sb.append("?");
+            if (mRootUrl.indexOf('?') >= 0) sb.append("&");
+            else sb.append("?");
 
             Iterator<String> iter = mQueryMap.keySet().iterator();
             if (iter.hasNext()) {

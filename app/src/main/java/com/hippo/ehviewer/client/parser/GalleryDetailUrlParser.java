@@ -29,8 +29,7 @@ import java.util.regex.Pattern;
  */
 public final class GalleryDetailUrlParser {
 
-    public static final Pattern URL_PATTERN = Pattern.compile("https?://(?:" +
-            EhUrl.DOMAIN_EX + "|" + EhUrl.DOMAIN_E + "|" + EhUrl.DOMAIN_LOFI + ")/g/(\\d+)/(\\w+)");
+    public static final Pattern URL_PATTERN = Pattern.compile("(?:b/manga/|uid=)(\\d+)");
 
     @Nullable
     public static Result parse(String url) {
@@ -42,7 +41,7 @@ public final class GalleryDetailUrlParser {
         if (m.find()) {
             Result result = new Result();
             result.gid = Long.parseLong(m.group(1));
-            result.token = m.group(2);
+            result.token = "";
             return result;
         } else {
             return null;

@@ -387,7 +387,7 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
             default:
             case MODE_NORMAL: {
                 boolean filter = false;
-                UrlBuilder ub = new UrlBuilder(EhUrl.getHost());
+                UrlBuilder ub = new UrlBuilder(EhUrl.getBoardAllUrl());
                 if (mCategory != EhUtils.NONE) {
                     ub.addQuery("f_doujinshi", ((mCategory & EhConfig.DOUJINSHI) == 0) ? "0" : "1");
                     ub.addQuery("f_manga", ((mCategory & EhConfig.MANGA) == 0) ? "0" : "1");
@@ -412,7 +412,7 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
                 }
                 // Page index
                 if (mPageIndex != 0) {
-                    ub.addQuery("page", mPageIndex);
+                    ub.addQuery("p", mPageIndex + 1);
                 }
                 // Advance search
                 if (mAdvanceSearch != -1) {

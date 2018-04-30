@@ -58,6 +58,11 @@ public class EhUrl {
     private static final String URL_PREFIX_THUMB_E = "https://ehgt.org/t/";
     private static final String URL_PREFIX_THUMB_EX = "https://exhentai.org/t/";
 
+    private static final String DOMAIN_MARU = "marumaru.in";
+    private static final String HOST_MARU = "https://" + DOMAIN_MARU + "/";
+    private static final String BOARD_LATEST = HOST_MARU + "b/mangaup";
+    private static final String BOARD_ALL = HOST_MARU + "?c=53/40";
+
     public static String getGalleryDetailUrl(long gid, String token) {
         return getGalleryDetailUrl(gid, token, 0, false);
     }
@@ -70,6 +75,14 @@ public class EhUrl {
             case SITE_EX:
                 return HOST_EX;
         }
+    }
+
+    public static String getLastestUrl() {
+        return BOARD_LATEST;
+    }
+
+    public static String getBoardAllUrl() {
+        return BOARD_ALL;
     }
 
     public static String getFavoritesUrl() {
