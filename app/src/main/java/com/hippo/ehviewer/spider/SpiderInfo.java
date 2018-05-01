@@ -44,10 +44,7 @@ public class SpiderInfo {
     public long gid = -1;
     public String token = null;
     public String chapter = null;
-    public int pages = -1;
-    public int previewPages = -1;
-    public int previewPerPage = -1;
-    public SparseArray<String> pTokenMap = null;
+    public String[] pages;
 
     public static SpiderInfo read(@Nullable UniFile file) {
         if (file == null) {
@@ -125,42 +122,23 @@ public class SpiderInfo {
             spiderInfo.token = IOUtils.readAsciiLine(is);
             // Deprecated, mode, skip it
             IOUtils.readAsciiLine(is);
-            // Preview pages
-            spiderInfo.previewPages = Integer.parseInt(IOUtils.readAsciiLine(is));
-            // Preview pre page
-            line = IOUtils.readAsciiLine(is);
-            if (version == 1) {
-                // Skip it
-            } else {
-                spiderInfo.previewPerPage = Integer.parseInt(line);
-            }
             // Pages
-            spiderInfo.pages = Integer.parseInt(IOUtils.readAsciiLine(is));
+            int pages = Integer.parseInt(IOUtils.readAsciiLine(is));
             // Check pages
-            if (spiderInfo.pages <= 0) {
+            if (pages <= 0) {
                 return null;
             }
-            // PToken
-            spiderInfo.pTokenMap = new SparseArray<>(spiderInfo.pages);
-            while (true) { // EOFException will raise
+            spiderInfo.pages = new String[pages];
+            for (int i = 0; i < pages; i++) { // EOFException will raise
                 line = IOUtils.readAsciiLine(is);
-                int pos = line.indexOf(" ");
-                if (pos > 0) {
-                    int index = Integer.parseInt(line.substring(0, pos));
-                    String pToken = line.substring(pos + 1);
-                    if (!TextUtils.isEmpty(pToken)) {
-                        spiderInfo.pTokenMap.put(index, pToken);
-                    }
-                } else {
-                    Log.e(TAG, "Can't parse index and pToken, index = " + pos);
-                }
+                spiderInfo.pages[i] = line;
             }
         } catch (IOException | NumberFormatException e) {
             // Ignore
         }
 
         if (spiderInfo == null || spiderInfo.gid == -1 || spiderInfo.token == null ||
-                spiderInfo.pages == -1 || spiderInfo.pTokenMap == null) {
+                spiderInfo.pages == null) {
             return null;
         } else {
             return spiderInfo;
@@ -178,25 +156,14 @@ public class SpiderInfo {
             writer.write("\n");
             writer.write(Long.toString(gid));
             writer.write("\n");
-            writer.write(token);
+            writer.write(token != null ? token : "");
             writer.write("\n");
             writer.write("1");
             writer.write("\n");
-            writer.write(Integer.toString(previewPages));
+            writer.write(Integer.toString(pages.length));
             writer.write("\n");
-            writer.write(Integer.toString(previewPerPage));
-            writer.write("\n");
-            writer.write(Integer.toString(pages));
-            writer.write("\n");
-            for (int i = 0; i < pTokenMap.size(); i++) {
-                Integer key = pTokenMap.keyAt(i);
-                String value = pTokenMap.valueAt(i);
-                if (TOKEN_FAILED.equals(value) || TextUtils.isEmpty(value)) {
-                    continue;
-                }
-                writer.write(Integer.toString(key));
-                writer.write(" ");
-                writer.write(value);
+            for (int i = 0; i < pages.length; i++) { // EOFException will raise
+                writer.write(pages[i]);
                 writer.write("\n");
             }
             writer.flush();

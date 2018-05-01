@@ -50,6 +50,7 @@ public final class SpiderDen {
     private final UniFile mDownloadDir;
     private volatile int mMode = SpiderQueen.MODE_READ;
     private final long mGid;
+    private final String mUid;
 
     @Nullable
     private static SimpleDiskCache sCache;
@@ -118,8 +119,9 @@ public final class SpiderDen {
         }
     }
 
-    public SpiderDen(GalleryInfo galleryInfo) {
+    public SpiderDen(GalleryInfo galleryInfo, String uid) {
         mGid = galleryInfo.gid;
+        mUid = uid;
         mDownloadDir = getGalleryDownloadDir(galleryInfo);
     }
 
@@ -156,7 +158,7 @@ public final class SpiderDen {
             return false;
         }
 
-        String key = EhCacheKeyFactory.getImageKey(mGid, index);
+        String key = EhCacheKeyFactory.getImageKey(mGid, mUid, index);
         return sCache.contain(key);
     }
 
@@ -209,7 +211,7 @@ public final class SpiderDen {
             return false;
         }
         // Find image file in cache
-        String key = EhCacheKeyFactory.getImageKey(mGid, index);
+        String key = EhCacheKeyFactory.getImageKey(mGid, mUid, index);
         InputStreamPipe pipe = sCache.getInputStreamPipe(key);
         if (pipe == null) {
             return false;
@@ -264,7 +266,7 @@ public final class SpiderDen {
             return false;
         }
 
-        String key = EhCacheKeyFactory.getImageKey(mGid, index);
+        String key = EhCacheKeyFactory.getImageKey(mGid, mUid, index);
         return sCache.remove(key);
     }
 
@@ -297,7 +299,7 @@ public final class SpiderDen {
             return null;
         }
 
-        String key = EhCacheKeyFactory.getImageKey(mGid, index);
+        String key = EhCacheKeyFactory.getImageKey(mGid, mUid, index);
         return sCache.getOutputStreamPipe(key);
     }
 
@@ -343,7 +345,7 @@ public final class SpiderDen {
             return null;
         }
 
-        String key = EhCacheKeyFactory.getImageKey(mGid, index);
+        String key = EhCacheKeyFactory.getImageKey(mGid, mUid, index);
         return sCache.getInputStreamPipe(key);
     }
 

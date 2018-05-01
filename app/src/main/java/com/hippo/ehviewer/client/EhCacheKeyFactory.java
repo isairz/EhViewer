@@ -34,7 +34,7 @@ public class EhCacheKeyFactory {
         return "large_preview_set:" + gid + ":" + index;
     }
 
-    public static String getImageKey(long gid, int index) {
-        return "image:" + gid + ":" + index;
+    public static String getImageKey(long gid, String uid, int index) {
+        return "image:" + gid + ":" + uid + ":" + index;
     }
 }

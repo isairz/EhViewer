@@ -479,13 +479,15 @@ public class GalleryDetailParser {
     /**
      * Parse pages with regular expressions
      */
-    public static int parsePages(String body) throws ParseException {
+    public static String[] parsePages(String body) throws ParseException {
+        List<String> urls = new ArrayList<String>();
         Matcher m = PATTERN_PAGES.matcher(body);
-        if (m.find()) {
-            return ParserUtils.parseInt(m.group(1));
-        } else {
-            throw new ParseException("Parse pages error", body);
+
+        while (m.find()) {
+            urls.add(m.group(1));
         }
+
+        return urls.toArray(new String[urls.size()]);
     }
 
     public static PreviewSet parsePreviewSet(Document d, String body) throws ParseException {

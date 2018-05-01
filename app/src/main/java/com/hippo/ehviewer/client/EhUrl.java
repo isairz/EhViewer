@@ -124,8 +124,8 @@ public class EhUrl {
         return "http://wasabisyrup.com/archives/" + uid;
     }
 
-    public static String getPageUrl(long gid, int index, String pToken) {
-        return getHost() + "s/" + pToken + '/' + gid + '-' + (index + 1);
+    public static String getPageUrl(long gid, String uid, String url) {
+        return "http://wasabisyrup.com" + url;
     }
 
     public static String getAddFavorites(long gid, String token) {
