@@ -61,7 +61,7 @@ public class EhUrl {
     private static final String DOMAIN_MARU = "marumaru.in";
     private static final String HOST_MARU = "https://" + DOMAIN_MARU + "/";
     private static final String BOARD_LATEST = HOST_MARU + "b/mangaup";
-    private static final String BOARD_ALL = HOST_MARU + "?c=53/40";
+    private static final String BOARD_ALL = HOST_MARU + "?m=bbs&bid=manga&where=subject&sort=gid";
 
     public static String getGalleryDetailUrl(long gid, String token) {
         return getGalleryDetailUrl(gid, token, 0, false);
@@ -116,13 +116,7 @@ public class EhUrl {
     }
 
     public static String getGalleryDetailUrl(long gid, String token, int index, boolean allComment) {
-        UrlBuilder builder = new UrlBuilder(getHost() + "g/" + gid + '/' + token + '/');
-        if (index != 0) {
-            builder.addQuery("p", index);
-        }
-        if (allComment) {
-            builder.addQuery("hc", 1);
-        }
+        UrlBuilder builder = new UrlBuilder(HOST_MARU + "b/manga/" + gid);
         return builder.build();
     }
 

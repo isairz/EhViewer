@@ -40,6 +40,7 @@ public class GalleryDetail extends GalleryInfo {
     public GalleryComment[] comments;
     public int previewPages;
     public PreviewSet previewSet;
+    public ArchiveInfo[] archives;
 
     @Override
     public int describeContents() {
@@ -64,6 +65,7 @@ public class GalleryDetail extends GalleryInfo {
         dest.writeParcelableArray(this.comments, 0);
         dest.writeInt(this.previewPages);
         dest.writeParcelable(previewSet, flags);
+        dest.writeParcelableArray(archives, 0);
     }
 
     public GalleryDetail() {
@@ -96,6 +98,12 @@ public class GalleryDetail extends GalleryInfo {
         }
         this.previewPages = in.readInt();
         this.previewSet = in.readParcelable(PreviewSet.class.getClassLoader());
+        array = in.readParcelableArray(ArchiveInfo.class.getClassLoader());
+        if (array != null) {
+            this.archives = Arrays.copyOf(array, array.length, ArchiveInfo[].class);
+        } else {
+            this.archives = null;
+        }
     }
 
     public static final Creator<GalleryDetail> CREATOR = new Creator<GalleryDetail>() {

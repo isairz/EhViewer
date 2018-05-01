@@ -68,6 +68,7 @@ import com.hippo.ehviewer.client.EhFilter;
 import com.hippo.ehviewer.client.EhRequest;
 import com.hippo.ehviewer.client.EhUrl;
 import com.hippo.ehviewer.client.EhUtils;
+import com.hippo.ehviewer.client.data.ArchiveInfo;
 import com.hippo.ehviewer.client.data.GalleryComment;
 import com.hippo.ehviewer.client.data.GalleryDetail;
 import com.hippo.ehviewer.client.data.GalleryInfo;
@@ -224,6 +225,10 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
     private LinearLayout mComments;
     @Nullable
     private TextView mCommentsText;
+    @Nullable
+    private LinearLayout mArchives;
+    @Nullable
+    private TextView mArchivesText;
     // Previews
     @Nullable
     private View mPreviews;
@@ -501,6 +506,11 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
         Ripple.addRipple(mComments, false);
         mComments.setOnClickListener(this);
 
+        mArchives = (LinearLayout) ViewUtils.$$(belowHeader, R.id.archives);
+        mArchivesText = (TextView) ViewUtils.$$(mArchives, R.id.archives_text);
+        Ripple.addRipple(mArchives, false);
+        mArchives.setOnClickListener(this);
+
         mPreviews = ViewUtils.$$(belowHeader, R.id.previews);
         mGridLayout = (SimpleGridAutoSpanLayout) ViewUtils.$$(mPreviews, R.id.grid_layout);
         mPreviewText = (TextView) ViewUtils.$$(mPreviews, R.id.preview_text);
@@ -586,6 +596,9 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
 
         mComments = null;
         mCommentsText = null;
+
+        mArchives = null;
+        mArchivesText = null;
 
         mPreviews = null;
         mGridLayout = null;
@@ -810,6 +823,7 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
 
         bindTags(gd.tags);
         bindComments(gd.comments);
+        bindArchives(gd.archives);
         bindPreviews(gd);
     }
 
@@ -889,6 +903,33 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
             c.setMaxLines(5);
             c.setText(Html.fromHtml(comment.comment,
                     new URLImageGetter(c, EhApplication.getConaco(context)), null));
+        }
+    }
+
+    private void bindArchives(ArchiveInfo[] archives) {
+        Context context = getContext2();
+        LayoutInflater inflater = getLayoutInflater2();
+        if (null == context || null == inflater || null == mArchives || null == mArchivesText) {
+            return;
+        }
+
+        mArchives.removeViews(0, mArchives.getChildCount() - 1);
+
+        final int maxShowCount = 2;
+        if (archives == null || archives.length == 0) {
+            mArchivesText.setText(R.string.no_previews);
+            return;
+        } else {
+            mArchivesText.setText("no_more_previews");
+        }
+
+        int length = archives.length;
+        for (int i = 0; i < length; i++) {
+            ArchiveInfo archive = archives[i];
+            View v = inflater.inflate(R.layout.item_gallery_archive, mArchives, false);
+            mArchives.addView(v, i);
+            TextView title = (TextView) v.findViewById(R.id.title);
+            title.setText(archive.title);
         }
     }
 

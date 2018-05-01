@@ -18,38 +18,28 @@ package com.hippo.ehviewer.client.parser;
 
 import android.support.annotation.Nullable;
 
-import com.hippo.ehviewer.client.EhUrl;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Like https://marumaru.in/b/manga/296613
- * /?c=53/40&;p=2&;where=subject&;uid=291908
+ * Like http://wasabisyrup.com/archives/IE3Q3_TFzaE
+ *
  */
-public final class GalleryDetailUrlParser {
+public final class GalleryArchiveUrlParser {
 
-    public static final Pattern URL_PATTERN = Pattern.compile("(?:b/manga/|uid=)(\\d+)");
+    public static final Pattern URL_PATTERN = Pattern.compile("/archives/(.+)");
 
     @Nullable
-    public static Result parse(String url) {
+    public static String parse(String url) {
         if (url == null) {
             return null;
         }
 
         Matcher m = URL_PATTERN.matcher(url);
         if (m.find()) {
-            Result result = new Result();
-            result.gid = Long.parseLong(m.group(1));
-            result.token = "";
-            return result;
+            return m.group(1);
         } else {
             return null;
         }
-    }
-
-    public static class Result {
-        public long gid;
-        public String token;
     }
 }

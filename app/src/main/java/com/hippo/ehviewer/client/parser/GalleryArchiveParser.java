@@ -23,7 +23,6 @@ import android.text.TextUtils;
 import com.hippo.ehviewer.Settings;
 import com.hippo.ehviewer.client.EhUrl;
 import com.hippo.ehviewer.client.EhUtils;
-import com.hippo.ehviewer.client.data.ArchiveInfo;
 import com.hippo.ehviewer.client.data.GalleryComment;
 import com.hippo.ehviewer.client.data.GalleryDetail;
 import com.hippo.ehviewer.client.data.GalleryTagGroup;
@@ -54,7 +53,7 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class GalleryDetailParser {
+public class GalleryArchiveParser {
 
     private static final Pattern PATTERN_ERROR = Pattern.compile("<div class=\"d\">\n<p>([^<]+)</p>");
     private static final Pattern PATTERN_DETAIL = Pattern.compile("var gid = (\\d+);.+?var token = \"([a-f0-9]+)\";.+?var apiuid = ([\\-\\d]+);.+?var apikey = \"([a-f0-9]+)\";", Pattern.DOTALL);
@@ -71,7 +70,6 @@ public class GalleryDetailParser {
 
     private static final GalleryTagGroup[] EMPTY_GALLERY_TAG_GROUP_ARRAY = new GalleryTagGroup[0];
     private static final GalleryComment[] EMPTY_GALLERY_COMMENT_ARRAY = new GalleryComment[0];
-    private static final ArchiveInfo[] EMPTY_ARCHIVE_INFO_ARRAY = new ArchiveInfo[0];
 
     private static final DateFormat WEB_COMMENT_DATE_FORMAT = new SimpleDateFormat("dd MMMMM yyyy, HH:mm z", Locale.US);
 
@@ -102,67 +100,87 @@ public class GalleryDetailParser {
         GalleryDetail galleryDetail = new GalleryDetail();
         Document document = Jsoup.parse(body);
         parseDetail(galleryDetail, document, body);
-        galleryDetail.tags = EMPTY_GALLERY_TAG_GROUP_ARRAY; // parseTagGroups(document);
-        galleryDetail.comments = EMPTY_GALLERY_COMMENT_ARRAY; // parseComments(document);
-        galleryDetail.archives = parseArchives(document);
-//        galleryDetail.previewPages = parsePreviewPages(document, body);
-//        galleryDetail.previewSet = parsePreviewSet(document, body);
+        galleryDetail.tags = parseTagGroups(document);
+        galleryDetail.comments = parseComments(document);
+        galleryDetail.previewPages = parsePreviewPages(document, body);
+        galleryDetail.previewSet = parsePreviewSet(document, body);
         return galleryDetail;
     }
 
     @SuppressWarnings("ConstantConditions")
     private static void parseDetail(GalleryDetail gd, Document d, String body) throws ParseException {
-//        Matcher matcher = PATTERN_DETAIL.matcher(body);
-//        if (matcher.find()) {
-//            gd.gid = Long.parseLong(matcher.group(1));
-//            gd.token = matcher.group(2);
-//            gd.apiUid = NumberUtils.parseLongSafely(matcher.group(3), -1L);
-//            gd.apiKey = matcher.group(4);
-//        } else {
-//            throw new ParseException("Can't parse gallery detail", body);
-//        }
-//
-//        matcher = PATTERN_ARCHIVE.matcher(body);
-//        if (matcher.find()) {
-//            gd.archiveUrl = StringUtils.unescapeXml(StringUtils.trim(matcher.group(1)));
-//        } else {
-//            gd.archiveUrl = "";
-//        }
+        Matcher matcher = PATTERN_DETAIL.matcher(body);
+        if (matcher.find()) {
+            gd.gid = Long.parseLong(matcher.group(1));
+            gd.token = matcher.group(2);
+            gd.apiUid = NumberUtils.parseLongSafely(matcher.group(3), -1L);
+            gd.apiKey = matcher.group(4);
+        } else {
+            throw new ParseException("Can't parse gallery detail", body);
+        }
+
+        matcher = PATTERN_TORRENT.matcher(body);
+        if (matcher.find()) {
+            gd.torrentUrl = StringUtils.unescapeXml(StringUtils.trim(matcher.group(1)));
+            gd.torrentCount = NumberUtils.parseIntSafely(matcher.group(2), 0);
+        } else {
+            gd.torrentCount = 0;
+            gd.torrentUrl = "";
+        }
+
+        matcher = PATTERN_ARCHIVE.matcher(body);
+        if (matcher.find()) {
+            gd.archiveUrl = StringUtils.unescapeXml(StringUtils.trim(matcher.group(1)));
+        } else {
+            gd.archiveUrl = "";
+        }
 
         try {
-            Element head = d.head();
+            Element gm = JsoupUtils.getElementByClass(d, "gm");
 
             // Thumb url
-            Elements gd1 = head.getElementsByAttributeValue("property", "og:image");
-            if (gd1 != null && gd1.size() >= 1) {
-                gd.thumb = gd1.first().attr("content");
-            } else {
+            Element gd1 = gm.getElementById("gd1");
+            try {
+                gd.thumb = parseCoverStyle(StringUtils.trim(gd1.child(0).attr("style")));
+            } catch (Exception e) {
                 gd.thumb = "";
             }
 
             // Title
-            Elements gn = head.getElementsByAttributeValue("name", "subject");
-            if (gn != null && gn.size() >= 1) {
-                gd.title = gn.first().attr("content");
+            Element gn = gm.getElementById("gn");
+            if (null != gn) {
+                gd.title = StringUtils.trim(gn.text());
             } else {
                 gd.title = "";
             }
 
             // Jpn title
-            gd.titleJpn = "";
+            Element gj = gm.getElementById("gj");
+            if (null != gj) {
+                gd.titleJpn = StringUtils.trim(gj.text());
+            } else {
+                gd.titleJpn = "";
+            }
 
             // Category
-            gd.category = EhUtils.UNKNOWN;
+            Element gdc = gm.getElementById("gdc");
+            try {
+                String href = gdc.child(0).attr("href");
+                String category = href.substring(href.lastIndexOf('/') + 1);
+                gd.category = EhUtils.getCategory(category);
+            } catch (Exception e) {
+                gd.category = EhUtils.UNKNOWN;
+            }
 
             // Uploader
-            Elements ga = head.getElementsByAttributeValue("name", "author");
-            if (ga != null && ga.size() >= 1) {
-                gd.uploader = ga.first().attr("content");
+            Element gdn = gm.getElementById("gdn");
+            if (null != gdn) {
+                gd.uploader = StringUtils.trim(gdn.text());
             } else {
                 gd.uploader = "";
             }
 
-
+            Element gdd = gm.getElementById("gdd");
             gd.posted = "";
             gd.parent = "";
             gd.visible = "";
@@ -170,22 +188,45 @@ public class GalleryDetailParser {
             gd.size = "";
             gd.pages = 0;
             gd.favoriteCount = 0;
-//            Element gdd = d.getElementById("vContent");
-//            try {
-//                Elements es = gdd.getElementsByAttributeValueContaining("href", "archives/");
-//                for (int i = 0, n = es.size(); i < n; i++) {
-//                    parseDetailInfo(gd, es.get(i), body);
-//                }
-//            } catch (Exception e) {
-//                // Ignore
-//            }
+            try {
+                Elements es = gdd.child(0).child(0).children();
+                for (int i = 0, n = es.size(); i < n; i++) {
+                    parseDetailInfo(gd, es.get(i), body);
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
 
             // Rating count
-            gd.ratingCount = 0;
-            gd.rating = -1.0f;
+            Element rating_count = gm.getElementById("rating_count");
+            if (null != rating_count) {
+                gd.ratingCount = NumberUtils.parseIntSafely(
+                        StringUtils.trim(rating_count.text()), 0);
+            } else {
+                gd.ratingCount = 0;
+            }
+
+            // Rating
+            Element rating_label = gm.getElementById("rating_label");
+            if (null != rating_label) {
+                String ratingStr = StringUtils.trim(rating_label.text());
+                if ("Not Yet Rated".equals(ratingStr)) {
+                    gd.rating = -1.0f;
+                } else {
+                    int index = ratingStr.indexOf(' ');
+                    if (index == -1 || index >= ratingStr.length()) {
+                        gd.rating = 0f;
+                    } else {
+                        gd.rating = NumberUtils.parseFloatSafely(ratingStr.substring(index + 1), 0f);
+                    }
+                }
+            } else {
+                gd.rating = -1.0f;
+            }
 
             // isFavorited
-            gd.isFavorited = false;
+            Element gdf = gm.getElementById("gdf");
+            gd.isFavorited = null != gdf && !StringUtils.trim(gdf.text()).equals("Add to Favorites");
         } catch (Exception e) {
             throw new ParseException("Can't parse gallery detail", body);
         }
@@ -416,27 +457,6 @@ public class GalleryDetailParser {
         }
 
         return list.toArray(new GalleryComment[list.size()]);
-    }
-
-    @NonNull
-    public static ArchiveInfo[] parseArchives(Document document) {
-        try {
-            Element content = document.getElementById("vContent");
-            Elements links = content.getElementsByAttributeValueContaining("href", "/archives/");;
-
-            List<ArchiveInfo> list = new ArrayList<>(links.size());
-            for (int i = 0, n = links.size(); i < n; i++) {
-                ArchiveInfo archiveInfo = new ArchiveInfo();
-                String href = links.get(i).attr("href");
-                archiveInfo.title = links.get(i).text();
-                archiveInfo.uid = href.substring(href.indexOf("/archives/") + 10);
-                list.add(archiveInfo);
-            }
-            return list.toArray(new ArchiveInfo[list.size()]);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return EMPTY_ARCHIVE_INFO_ARRAY;
-        }
     }
 
     /**

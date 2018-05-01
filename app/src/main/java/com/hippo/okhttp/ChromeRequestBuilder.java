@@ -23,8 +23,8 @@ import okhttp3.Request;
 
 public class ChromeRequestBuilder extends Request.Builder {
 
-    private static final String CHROME_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36";
+    private static final String CHROME_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) " +
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Mobile Safari/537.36";
 
     public ChromeRequestBuilder(String url) throws MalformedURLException {
         url(new URL(url));

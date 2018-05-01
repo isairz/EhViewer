@@ -50,6 +50,9 @@
                 layout="@layout/gallery_detail_comments"/>
 
             <include
+                layout="@layout/gallery_detail_archives"/>
+
+            <include
                 layout="@layout/gallery_detail_previews"/>
 
         </LinearLayout>

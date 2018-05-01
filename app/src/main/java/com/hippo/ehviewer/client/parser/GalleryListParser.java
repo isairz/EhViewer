@@ -25,7 +25,6 @@ import com.hippo.ehviewer.client.data.GalleryInfo;
 import com.hippo.ehviewer.client.exception.ParseException;
 import com.hippo.util.JsoupUtils;
 import com.hippo.yorozuya.NumberUtils;
-import com.hippo.yorozuya.StringUtils;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -44,7 +43,8 @@ public class GalleryListParser {
 
     private static final Pattern PATTERN_PAGES = Pattern.compile("(\\d+)페이지");
     private static final Pattern PATTERN_RATING = Pattern.compile("\\d+px");
-    private static final Pattern PATTERN_THUMB_SIZE = Pattern.compile("height:(\\d+)px; width:(\\d+)px");
+    private static final Pattern PATTERN_THUMB_SRC = Pattern.compile("url\\((.*)\\)");
+    private static final Pattern PATTERN_LINK_SRC = Pattern.compile("'(.*)'");
 
     public static class Result {
         public int pages;
@@ -53,7 +53,7 @@ public class GalleryListParser {
 
     private static int parsePages(Document d, String body) throws ParseException {
         try {
-            String s = d.getElementsByClass("article").first().text();
+            String s = d.getElementsByClass("stat").first().text();
             Matcher m = PATTERN_PAGES.matcher(s);
             if (m.find()) {
                 return Integer.parseInt(m.group(1));
@@ -106,7 +106,7 @@ public class GalleryListParser {
             gi.category = EhUtils.UNKNOWN;
         }
         // Posted
-        Element itd = JsoupUtils.getElementByClass(e, "itd");
+        Element itd = JsoupUtils.getElementByClass(e, "info");
         if (null != itd) {
             gi.posted = itd.text().trim();
         } else {
@@ -114,14 +114,14 @@ public class GalleryListParser {
             gi.posted = "";
         }
         // Thumb
-        Element it2 = JsoupUtils.getElementByClass(e, "pic");
+        Element it2 = JsoupUtils.getElementByClass(e, "image-thumb");
         if (null != it2) {
             // Thumb size
-            Element img = JsoupUtils.getElementByTag(it2, "img");
-            if (null != img) {
-                gi.thumb = EhUtils.handleThumbUrlResolution(img.attr("src"));
-                gi.thumbWidth = Integer.parseInt(img.attr("width").replace("px", ""));
-                gi.thumbHeight = Integer.parseInt(img.attr("height").replace("px", ""));
+            Matcher m = PATTERN_THUMB_SRC.matcher(it2.attr("style"));
+            if (m.find()) {
+                gi.thumb = m.group(1);
+                gi.thumbWidth = 150;
+                gi.thumbHeight = 240;
             } else {
                 Log.w(TAG, "Can't parse gallery info thumb url");
                 gi.thumb = "";
@@ -135,25 +135,29 @@ public class GalleryListParser {
             gi.thumb = "";
         }
         // Title (required)
-        Element it5 = JsoupUtils.getElementByClass(e, "sbjx");
-        if (null == it5) {
-            Log.e(TAG, "Can't parse gallery info title, step 1");
+        Element it5 = JsoupUtils.getElementByClass(e, "subject");
+        if (null != it5) {
+            gi.title = it5.text();
+        } else {
+            Log.e(TAG, "Can't parse gallery info title");
             return null;
         }
-        Elements es = it5.children();
-        if (null == es || es.size() <= 0) {
-            Log.e(TAG, "Can't parse gallery info title, step 2");
+
+        // Link (required)
+        Matcher m = PATTERN_LINK_SRC.matcher(e.attr("onclick"));
+        if (m.find()) {
+            GalleryDetailUrlParser.Result result = GalleryDetailUrlParser.parse(m.group(1));
+            if (null != result) {
+                gi.gid = result.gid;
+                gi.token = result.token;
+            } else {
+                Log.w(TAG, "Can't parse gallery info link 1");
+                return null;
+            }
+        } else {
+            Log.w(TAG, "Can't parse gallery info link 2");
             return null;
         }
-        Element a = es.get(0);
-        GalleryDetailUrlParser.Result result = GalleryDetailUrlParser.parse(a.attr("href"));
-        if (null == result) {
-            Log.e(TAG, "Can't parse gallery info title, step 3");
-            return null;
-        }
-        gi.gid = result.gid;
-        gi.token = result.token;
-        gi.title = a.text().trim();
         // Rating
         Element it4r = JsoupUtils.getElementByClass(e, "it4r");
         if (null != it4r) {
@@ -194,7 +198,7 @@ public class GalleryListParser {
         }
 
         try {
-            Elements es = d.getElementsByClass("picbox");
+            Elements es = d.getElementsByClass("list");
             List<GalleryInfo> list = new ArrayList<>(es.size());
             for (int i = 0; i < es.size(); i++) {
                 GalleryInfo gi = parseGalleryInfo(es.get(i));
