@@ -508,8 +508,6 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
 
         mArchives = (LinearLayout) ViewUtils.$$(belowHeader, R.id.archives);
         mArchivesText = (TextView) ViewUtils.$$(mArchives, R.id.archives_text);
-        Ripple.addRipple(mArchives, false);
-        mArchives.setOnClickListener(this);
 
         mPreviews = ViewUtils.$$(belowHeader, R.id.previews);
         mGridLayout = (SimpleGridAutoSpanLayout) ViewUtils.$$(mPreviews, R.id.grid_layout);
@@ -930,6 +928,9 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
             mArchives.addView(v, i);
             TextView title = (TextView) v.findViewById(R.id.title);
             title.setText(archive.title);
+            v.setTag(R.id.chapter, archive.uid);
+            Ripple.addRipple(v, false);
+            v.setOnClickListener(this);
         }
     }
 
@@ -1287,6 +1288,17 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
             }
 
             GalleryInfo galleryInfo = getGalleryInfo();
+            o = v.getTag(R.id.chapter);
+            if (null != galleryInfo && o instanceof String) {
+                String uid = (String) o;
+                Intent intent = new Intent(context, GalleryActivity.class);
+                intent.setAction(GalleryActivity.ACTION_EH);
+                intent.putExtra(GalleryActivity.KEY_GALLERY_INFO, galleryInfo);
+                intent.putExtra(GalleryActivity.KEY_CHAPTER, uid);
+                startActivity(intent);
+                return;
+            }
+
             o = v.getTag(R.id.index);
             if (null != galleryInfo && o instanceof Integer) {
                 int index = (Integer) o;

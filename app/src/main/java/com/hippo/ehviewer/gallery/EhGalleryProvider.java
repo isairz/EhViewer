@@ -33,19 +33,21 @@ public class EhGalleryProvider extends GalleryProvider2 implements SpiderQueen.O
 
     private final Context mContext;
     private final GalleryInfo mGalleryInfo;
+    private final String mChapter;
     @Nullable
     private SpiderQueen mSpiderQueen;
 
-    public EhGalleryProvider(Context context, GalleryInfo galleryInfo) {
+    public EhGalleryProvider(Context context, GalleryInfo galleryInfo, String chapter) {
         mContext = context;
         mGalleryInfo = galleryInfo;
+        mChapter = chapter;
     }
 
     @Override
     public void start() {
         super.start();
 
-        mSpiderQueen = SpiderQueen.obtainSpiderQueen(mContext, mGalleryInfo, SpiderQueen.MODE_READ);
+        mSpiderQueen = SpiderQueen.obtainSpiderQueen(mContext, mGalleryInfo, mChapter, SpiderQueen.MODE_READ);
         mSpiderQueen.addOnSpiderListener(this);
     }
 

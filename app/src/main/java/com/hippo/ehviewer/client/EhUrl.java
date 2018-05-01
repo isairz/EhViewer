@@ -120,6 +120,10 @@ public class EhUrl {
         return builder.build();
     }
 
+    public static String getArchiveUrl(long gid, String uid) {
+        return "http://wasabisyrup.com/archives/" + uid;
+    }
+
     public static String getPageUrl(long gid, int index, String pToken) {
         return getHost() + "s/" + pToken + '/' + gid + '-' + (index + 1);
     }

@@ -47,10 +47,10 @@
                 layout="@layout/gallery_detail_tags"/>
 
             <include
-                layout="@layout/gallery_detail_comments"/>
+                layout="@layout/gallery_detail_archives"/>
 
             <include
-                layout="@layout/gallery_detail_archives"/>
+                layout="@layout/gallery_detail_comments"/>
 
             <include
                 layout="@layout/gallery_detail_previews"/>

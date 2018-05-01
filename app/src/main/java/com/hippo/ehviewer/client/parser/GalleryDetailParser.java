@@ -64,10 +64,10 @@ public class GalleryDetailParser {
     private static final Pattern PATTERN_TAG_GROUP = Pattern.compile("<tr><td[^<>]+>([\\w\\s]+):</td><td>(?:<div[^<>]+><a[^<>]+>[\\w\\s]+</a></div>)+</td></tr>");
     private static final Pattern PATTERN_TAG = Pattern.compile("<div[^<>]+><a[^<>]+>([\\w\\s]+)</a></div>");
     private static final Pattern PATTERN_COMMENT = Pattern.compile("<div class=\"c3\">Posted on ([^<>]+) by: &nbsp; <a[^<>]+>([^<>]+)</a>.+?<div class=\"c6\"[^>]*>(.+?)</div><div class=\"c[78]\"");
-    private static final Pattern PATTERN_PAGES = Pattern.compile("<tr><td[^<>]*>Length:</td><td[^<>]*>([\\d,]+) pages</td></tr>");
+    private static final Pattern PATTERN_PAGES = Pattern.compile("data-src=\"(.+)\"");
     private static final Pattern PATTERN_PREVIEW_PAGES = Pattern.compile("<td[^>]+><a[^>]+>([\\d,]+)</a></td><td[^>]+>(?:<a[^>]+>)?&gt;(?:</a>)?</td>");
     private static final Pattern PATTERN_NORMAL_PREVIEW = Pattern.compile("<div class=\"gdtm\"[^<>]*><div[^<>]*width:(\\d+)[^<>]*height:(\\d+)[^<>]*\\((.+?)\\)[^<>]*-(\\d+)px[^<>]*><a[^<>]*href=\"(.+?)\"[^<>]*><img alt=\"([\\d,]+)\"");
-    private static final Pattern PATTERN_LARGE_PREVIEW = Pattern.compile("<div class=\"gdtl\".+?<a href=\"(.+?)\"><img alt=\"([\\d,]+)\".+?src=\"(.+?)\"");
+    private static final Pattern PATTERN_LARGE_PREVIEW = Pattern.compile("data-src=\"(.+)\"");
 
     private static final GalleryTagGroup[] EMPTY_GALLERY_TAG_GROUP_ARRAY = new GalleryTagGroup[0];
     private static final GalleryComment[] EMPTY_GALLERY_COMMENT_ARRAY = new GalleryComment[0];
@@ -112,6 +112,13 @@ public class GalleryDetailParser {
 
     @SuppressWarnings("ConstantConditions")
     private static void parseDetail(GalleryDetail gd, Document d, String body) throws ParseException {
+        GalleryDetailUrlParser.Result result = GalleryDetailUrlParser.parse(body);
+        if (null != result) {
+            gd.gid = result.gid;
+        }
+        else {
+            throw new ParseException("Can't parse gallery detail", body);
+        }
 //        Matcher matcher = PATTERN_DETAIL.matcher(body);
 //        if (matcher.find()) {
 //            gd.gid = Long.parseLong(matcher.group(1));
@@ -533,15 +540,17 @@ public class GalleryDetailParser {
     private static LargePreviewSet parseLargePreviewSet(String body) throws ParseException {
         Matcher m = PATTERN_LARGE_PREVIEW.matcher(body);
         LargePreviewSet largePreviewSet = new LargePreviewSet();
+        int index = 0;
 
         while (m.find()) {
-            int index = ParserUtils.parseInt(m.group(2)) - 1;
-            String imageUrl = ParserUtils.trim(m.group(3));
-            String pageUrl = ParserUtils.trim(m.group(1));
+            String url = "http://wasabisyrup.com" + m.group(1);
+            String imageUrl = url;
+            String pageUrl = url;
             if (Settings.getFixThumbUrl()) {
                 imageUrl = EhUrl.getFixedPreviewThumbUrl(imageUrl);
             }
             largePreviewSet.addItem(index, imageUrl, pageUrl);
+            index++;
         }
 
         if (largePreviewSet.size() == 0) {

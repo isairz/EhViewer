@@ -94,6 +94,7 @@ public class GalleryActivity extends EhActivity implements SeekBar.OnSeekBarChan
     public static final String KEY_FILENAME = "filename";
     public static final String KEY_URI = "uri";
     public static final String KEY_GALLERY_INFO = "gallery_info";
+    public static final String KEY_CHAPTER = "chapter";
     public static final String KEY_PAGE = "page";
     public static final String KEY_CURRENT_INDEX = "current_index";
 
@@ -106,6 +107,7 @@ public class GalleryActivity extends EhActivity implements SeekBar.OnSeekBarChan
     private String mFilename;
     private Uri mUri;
     private GalleryInfo mGalleryInfo;
+    private String mChapter;
     private int mPage;
     private String mCacheFileName;
 
@@ -197,7 +199,7 @@ public class GalleryActivity extends EhActivity implements SeekBar.OnSeekBarChan
             }
         } else if (ACTION_EH.equals(mAction)) {
             if (mGalleryInfo != null) {
-                mGalleryProvider = new EhGalleryProvider(this, mGalleryInfo);
+                mGalleryProvider = new EhGalleryProvider(this, mGalleryInfo, mChapter);
             }
         } else if (Intent.ACTION_VIEW.equals(mAction)) {
             if (mUri != null) {
@@ -217,6 +219,7 @@ public class GalleryActivity extends EhActivity implements SeekBar.OnSeekBarChan
         mFilename = intent.getStringExtra(KEY_FILENAME);
         mUri = intent.getData();
         mGalleryInfo = intent.getParcelableExtra(KEY_GALLERY_INFO);
+        mChapter = intent.getStringExtra(KEY_CHAPTER);
         mPage = intent.getIntExtra(KEY_PAGE, -1);
         buildProvider();
     }
@@ -226,6 +229,7 @@ public class GalleryActivity extends EhActivity implements SeekBar.OnSeekBarChan
         mFilename = savedInstanceState.getString(KEY_FILENAME);
         mUri= savedInstanceState.getParcelable(KEY_URI);
         mGalleryInfo = savedInstanceState.getParcelable(KEY_GALLERY_INFO);
+        mChapter = savedInstanceState.getString(KEY_CHAPTER);
         mPage = savedInstanceState.getInt(KEY_PAGE, -1);
         mCurrentIndex = savedInstanceState.getInt(KEY_CURRENT_INDEX);
         buildProvider();
@@ -240,6 +244,7 @@ public class GalleryActivity extends EhActivity implements SeekBar.OnSeekBarChan
         if (mGalleryInfo != null) {
             outState.putParcelable(KEY_GALLERY_INFO, mGalleryInfo);
         }
+        outState.putString(KEY_CHAPTER, mChapter);
         outState.putInt(KEY_PAGE, mPage);
         outState.putInt(KEY_CURRENT_INDEX, mCurrentIndex);
     }

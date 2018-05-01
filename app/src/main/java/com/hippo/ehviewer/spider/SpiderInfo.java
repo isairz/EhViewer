@@ -43,6 +43,7 @@ public class SpiderInfo {
     public int startPage = 0;
     public long gid = -1;
     public String token = null;
+    public String chapter = null;
     public int pages = -1;
     public int previewPages = -1;
     public int previewPerPage = -1;

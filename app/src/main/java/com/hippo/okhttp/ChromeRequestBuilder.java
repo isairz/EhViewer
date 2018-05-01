@@ -29,5 +29,9 @@ public class ChromeRequestBuilder extends Request.Builder {
     public ChromeRequestBuilder(String url) throws MalformedURLException {
         url(new URL(url));
         addHeader("User-Agent", CHROME_USER_AGENT);
+        addHeader("Cache-Control", "no-cache");
+        addHeader("Upgrade-Insecure-Requests", "1");
+        addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+//        addHeader("Accept-Encoding", "gzip, deflate");
     }
 }

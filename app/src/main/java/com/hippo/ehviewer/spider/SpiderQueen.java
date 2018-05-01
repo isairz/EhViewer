@@ -125,6 +125,7 @@ public final class SpiderQueen implements Runnable {
     private final SimpleDiskCache mSpiderInfoCache;
     @NonNull
     private final GalleryInfo mGalleryInfo;
+    private final String mChapter;
     @NonNull
     private final SpiderDen mSpiderDen;
 
@@ -173,10 +174,11 @@ public final class SpiderQueen implements Runnable {
     private final int mWorkerMaxCount;
     private final int mPreloadNumber;
 
-    private SpiderQueen(EhApplication application, @NonNull GalleryInfo galleryInfo) {
+    private SpiderQueen(EhApplication application, @NonNull GalleryInfo galleryInfo, String chapter) {
         mHttpClient = EhApplication.getOkHttpClient(application);
         mSpiderInfoCache = EhApplication.getSpiderInfoCache(application);
         mGalleryInfo = galleryInfo;
+        mChapter = chapter;
         mSpiderDen = new SpiderDen(mGalleryInfo);
 
         mWorkerMaxCount = MathUtils.clamp(Settings.getMultiThreadDownload(), 1, 10);
@@ -287,13 +289,13 @@ public final class SpiderQueen implements Runnable {
 
     @UiThread
     public static SpiderQueen obtainSpiderQueen(@NonNull Context context,
-            @NonNull GalleryInfo galleryInfo, @Mode int mode) {
+            @NonNull GalleryInfo galleryInfo, String chapter, @Mode int mode) {
         OSUtils.checkMainLoop();
 
         SpiderQueen queen = sQueenMap.get(galleryInfo.gid);
         if (queen == null) {
             EhApplication application = (EhApplication) context.getApplicationContext();
-            queen = new SpiderQueen(application, galleryInfo);
+            queen = new SpiderQueen(application, galleryInfo, chapter);
             sQueenMap.put(galleryInfo.gid, queen);
             // Set mode
             queen.setMode(mode);
@@ -711,8 +713,8 @@ public final class SpiderQueen implements Runnable {
     }
 
     private void readPreviews(String body, int index, SpiderInfo spiderInfo) throws ParseException {
-        spiderInfo.pages = GalleryDetailParser.parsePages(body);
-        spiderInfo.previewPages = GalleryDetailParser.parsePreviewPages(body);
+        spiderInfo.pages = 1;
+        spiderInfo.previewPages = 1;
         PreviewSet previewSet = GalleryDetailParser.parsePreviewSet(body);
         if ((index >= 0 && index < spiderInfo.pages - 1) || (index == 0 && spiderInfo.pages == 1)) {
             spiderInfo.previewPerPage = previewSet.size();
@@ -720,14 +722,12 @@ public final class SpiderQueen implements Runnable {
             spiderInfo.previewPerPage = Math.max(spiderInfo.previewPerPage, previewSet.size());
         }
 
-        for (int i = 0, n = previewSet.size(); i < n; i++) {
-            GalleryPageUrlParser.Result result = GalleryPageUrlParser.parse(previewSet.getPageUrlAt(i));
-            if (result != null) {
-                synchronized (mPTokenLock) {
-                    spiderInfo.pTokenMap.put(result.page, result.pToken);
-                }
-            }
-        }
+//        for (int i = 0, n = previewSet.size(); i < n; i++) {
+//            GalleryPageUrlParser.Result result = GalleryPageUrlParser.parse(previewSet.getPageUrlAt(i));
+//            synchronized (mPTokenLock) {
+//                spiderInfo.pTokenMap.put(previewSet.getPageUrlAt(i), result.pToken);
+//            }
+//        }
     }
 
     private SpiderInfo readSpiderInfoFromInternet(EhConfig config) {
@@ -735,13 +735,14 @@ public final class SpiderQueen implements Runnable {
             SpiderInfo spiderInfo = new SpiderInfo();
             spiderInfo.gid = mGalleryInfo.gid;
             spiderInfo.token = mGalleryInfo.token;
+            spiderInfo.chapter = mChapter;
 
-            Request request = new EhRequestBuilder(EhUrl.getGalleryDetailUrl(
-                    mGalleryInfo.gid, mGalleryInfo.token, 0, false), config).build();
+            Request request = new EhRequestBuilder(EhUrl.getArchiveUrl(
+                    mGalleryInfo.gid, mChapter), config).build();
             Response response = mHttpClient.newCall(request).execute();
             String body = response.body().string();
 
-            spiderInfo.pages = GalleryDetailParser.parsePages(body);
+            spiderInfo.pages = 1;
             spiderInfo.pTokenMap = new SparseArray<>(spiderInfo.pages);
             readPreviews(body, 0, spiderInfo);
             return spiderInfo;
@@ -870,55 +871,55 @@ public final class SpiderQueen implements Runnable {
             mDecodeThreadArray[i] = decoderThread;
             decoderThread.start();
         }
-
-        // handle pToken request
-        while (!Thread.currentThread().isInterrupted()) {
-            Integer index = mRequestPTokenQueue.poll();
-
-            if (index == null) {
-                // No request index, wait here
-                synchronized (mQueenLock) {
-                    try {
-                        mQueenLock.wait();
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                }
-                continue;
-            }
-
-            // Check it in spider info
-            String pToken;
-            synchronized (mPTokenLock) {
-                pToken = spiderInfo.pTokenMap.get(index);
-            }
-            if (pToken != null) {
-                // Get pToken from spider info, notify worker
-                synchronized (mWorkerLock) {
-                    mWorkerLock.notifyAll();
-                }
-                continue;
-            }
-
-            // Get pToken from internet
-            pToken = getPTokenFromInternet(index, config);
-            if (null == pToken) {
-                // Preview size may changed, so try to get pToken twice
-                pToken = getPTokenFromInternet(index, config);
-            }
-
-            if (null == pToken) {
-                // If failed, set the pToken "failed"
-                synchronized (mPTokenLock) {
-                    spiderInfo.pTokenMap.put(index, SpiderInfo.TOKEN_FAILED);
-                }
-            }
-
-            // Notify worker
-            synchronized (mWorkerLock) {
-                mWorkerLock.notifyAll();
-            }
-        }
+//
+//        // handle pToken request
+//        while (!Thread.currentThread().isInterrupted()) {
+//            Integer index = mRequestPTokenQueue.poll();
+//
+//            if (index == null) {
+//                // No request index, wait here
+//                synchronized (mQueenLock) {
+//                    try {
+//                        mQueenLock.wait();
+//                    } catch (InterruptedException e) {
+//                        break;
+//                    }
+//                }
+//                continue;
+//            }
+//
+//            // Check it in spider info
+//            String pToken;
+//            synchronized (mPTokenLock) {
+//                pToken = spiderInfo.pTokenMap.get(index);
+//            }
+//            if (pToken != null) {
+//                // Get pToken from spider info, notify worker
+//                synchronized (mWorkerLock) {
+//                    mWorkerLock.notifyAll();
+//                }
+//                continue;
+//            }
+//
+//            // Get pToken from internet
+//            pToken = getPTokenFromInternet(index, config);
+//            if (null == pToken) {
+//                // Preview size may changed, so try to get pToken twice
+//                pToken = getPTokenFromInternet(index, config);
+//            }
+//
+//            if (null == pToken) {
+//                // If failed, set the pToken "failed"
+//                synchronized (mPTokenLock) {
+//                    spiderInfo.pTokenMap.put(index, SpiderInfo.TOKEN_FAILED);
+//                }
+//            }
+//
+//            // Notify worker
+//            synchronized (mWorkerLock) {
+//                mWorkerLock.notifyAll();
+//            }
+//        }
     }
 
     @Override
