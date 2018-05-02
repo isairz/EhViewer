@@ -60,7 +60,7 @@ public class EhUrl {
 
     private static final String DOMAIN_MARU = "marumaru.in";
     private static final String HOST_MARU = "https://" + DOMAIN_MARU + "/";
-    private static final String BOARD_LATEST = HOST_MARU + "b/mangaup";
+    private static final String BOARD_LATEST = HOST_MARU + "?m=bbs&bid=mangaup";
     private static final String BOARD_ALL = HOST_MARU + "?m=bbs&bid=manga&where=subject&sort=gid";
 
     public static String getGalleryDetailUrl(long gid, String token) {
@@ -68,13 +68,7 @@ public class EhUrl {
     }
 
     public static String getHost() {
-        switch (Settings.getGallerySite()) {
-            default:
-            case SITE_E:
-                return HOST_E;
-            case SITE_EX:
-                return HOST_EX;
-        }
+        return HOST_MARU;
     }
 
     public static String getLastestUrl() {

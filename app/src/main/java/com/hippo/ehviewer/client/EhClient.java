@@ -61,6 +61,7 @@ public class EhClient {
     public static final int METHOD_IMAGE_SEARCH = 16;
     public static final int METHOD_ARCHIVE_LIST = 17;
     public static final int METHOD_DOWNLOAD_ARCHIVE = 18;
+    public static final int METHOD_GET_WHATS_NEW = 19;
 
     private final ThreadPoolExecutor mRequestThreadPool;
     private final OkHttpClient mOkHttpClient;
@@ -180,6 +181,8 @@ public class EhClient {
                         return EhEngine.getTorrentList(this, mOkHttpClient, (String) params[0]);
                     case METHOD_GET_WHATS_HOT:
                         return EhEngine.getWhatsHot(this, mOkHttpClient);
+                    case METHOD_GET_WHATS_NEW:
+                        return EhEngine.getGalleryList(this, mOkHttpClient, (String) params[0]);
                     case METHOD_GET_PROFILE:
                         return EhEngine.getProfile(this, mOkHttpClient);
                     case METHOD_VOTE_COMMENT:

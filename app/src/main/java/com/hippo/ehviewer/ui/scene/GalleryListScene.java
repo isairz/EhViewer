@@ -117,6 +117,7 @@ public final class GalleryListScene extends BaseScene
     public final static String KEY_ACTION = "action";
     public final static String ACTION_HOMEPAGE = "action_homepage";
     public final static String ACTION_WHATS_HOT = "action_whats_hot";
+    public final static String ACTION_WHATS_NEW = "action_whats_new";
     public final static String ACTION_LIST_URL_BUILDER = "action_list_url_builder";
 
     public final static String KEY_LIST_URL_BUILDER = "list_url_builder";
@@ -231,6 +232,8 @@ public final class GalleryListScene extends BaseScene
             mUrlBuilder.reset();
         } else if (ACTION_WHATS_HOT.equals(action)) {
             mUrlBuilder.setMode(ListUrlBuilder.MODE_WHATS_HOT);
+        } else if (ACTION_WHATS_NEW.equals(action)) {
+            mUrlBuilder.setMode(ListUrlBuilder.MODE_WHATS_NEW);
         } else if (ACTION_LIST_URL_BUILDER.equals(action)) {
             ListUrlBuilder builder = args.getParcelable(KEY_LIST_URL_BUILDER);
             if (builder != null) {
@@ -329,6 +332,8 @@ public final class GalleryListScene extends BaseScene
             return resources.getString(appName ? R.string.app_name : R.string.homepage);
         } else if (ListUrlBuilder.MODE_WHATS_HOT == urlBuilder.getMode()) {
             return resources.getString(R.string.whats_hot);
+        } else if (ListUrlBuilder.MODE_WHATS_NEW == urlBuilder.getMode()) {
+            return resources.getString(R.string.whats_new);
         } else if (!TextUtils.isEmpty(keyword)) {
             return keyword;
         } else if (MathUtils.hammingWeight(category) == 1) {
@@ -372,6 +377,8 @@ public final class GalleryListScene extends BaseScene
             checkedItemId = R.id.nav_homepage;
         } else if (ListUrlBuilder.MODE_WHATS_HOT == builder.getMode()) {
             checkedItemId = R.id.nav_whats_hot;
+        } else if (ListUrlBuilder.MODE_WHATS_NEW == builder.getMode()) {
+            checkedItemId = R.id.nav_whats_new;
         } else {
             checkedItemId = 0;
         }
@@ -1299,6 +1306,14 @@ public final class GalleryListScene extends BaseScene
                         activity.getStageId(), getTag(), taskId));
                 request.setArgs();
                 mClient.execute(request);
+            } else if (ListUrlBuilder.MODE_WHATS_NEW == mUrlBuilder.getMode()) {
+                String url = mUrlBuilder.build();
+                EhRequest request = new EhRequest();
+                request.setMethod(EhClient.METHOD_GET_WHATS_NEW);
+                request.setCallback(new GetWhatsNewListener(getContext(),
+                        activity.getStageId(), getTag(), taskId));
+                request.setArgs(url);
+                mClient.execute(request);
             } else if (ListUrlBuilder.MODE_IMAGE_SEARCH == mUrlBuilder.getMode()) {
                 EhRequest request = new EhRequest();
                 request.setMethod(EhClient.METHOD_IMAGE_SEARCH);
@@ -1416,6 +1431,55 @@ public final class GalleryListScene extends BaseScene
             GalleryListScene scene = getScene();
             if (scene != null) {
                 scene.onGetWhatsHotFailure(e, mTaskId);
+            }
+        }
+
+        @Override
+        public void onCancel() {}
+
+        @Override
+        public boolean isInstance(SceneFragment scene) {
+            return scene instanceof GalleryListScene;
+        }
+    }
+
+    private void onGetWhatsNewSuccess(GalleryListParser.Result result, int taskId) {
+        if (mHelper != null && mSearchBarMover != null &&
+                mHelper.isCurrentTask(taskId)) {
+            mHelper.setPages(taskId, result.pages);
+            mHelper.onGetPageData(taskId, result.galleryInfoList);
+        }
+    }
+
+    private void onGetWhatsNewFailure(Exception e, int taskId) {
+        if (mHelper != null && mSearchBarMover != null &&
+                mHelper.isCurrentTask(taskId)) {
+            mHelper.onGetException(taskId, e);
+        }
+    }
+
+    private static class GetWhatsNewListener extends EhCallback<GalleryListScene, GalleryListParser.Result> {
+
+        private final int mTaskId;
+
+        public GetWhatsNewListener(Context context, int stageId, String sceneTag, int taskId) {
+            super(context, stageId, sceneTag);
+            mTaskId = taskId;
+        }
+
+        @Override
+        public void onSuccess(GalleryListParser.Result result) {
+            GalleryListScene scene = getScene();
+            if (scene != null) {
+                scene.onGetWhatsNewSuccess(result, mTaskId);
+            }
+        }
+
+        @Override
+        public void onFailure(Exception e) {
+            GalleryListScene scene = getScene();
+            if (scene != null) {
+                scene.onGetWhatsNewFailure(e, mTaskId);
             }
         }
 

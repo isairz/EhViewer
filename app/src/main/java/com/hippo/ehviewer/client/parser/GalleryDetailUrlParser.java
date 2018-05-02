@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  */
 public final class GalleryDetailUrlParser {
 
-    public static final Pattern URL_PATTERN = Pattern.compile("(?:b/manga/|uid=)(\\d+)");
+    public static final Pattern URL_PATTERN = Pattern.compile("(?:b/manga/|b/mangaup/|uid=)(\\d+)");
 
     @Nullable
     public static Result parse(String url) {

@@ -76,7 +76,10 @@ public class EhUtils {
             new String[] { "book", "단행본" },
             new String[] { "completed", "완결" },
             new String[] { "shortstory", "단편" },
-            new String[] { "unknown" }
+            new String[] { "unknown" },
+            new String[] { "unknown" },
+            new String[] { "unknown" },
+            new String[] { "unknown" },
     };
 
     public static int getCategory(String type) {

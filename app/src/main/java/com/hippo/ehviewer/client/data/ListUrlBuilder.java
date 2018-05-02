@@ -38,7 +38,7 @@ import java.net.URLEncoder;
 
 public class ListUrlBuilder implements Cloneable, Parcelable {
 
-    @IntDef({MODE_NORMAL, MODE_UPLOADER, MODE_TAG, MODE_WHATS_HOT, MODE_IMAGE_SEARCH})
+    @IntDef({MODE_NORMAL, MODE_UPLOADER, MODE_TAG, MODE_WHATS_HOT, MODE_WHATS_NEW, MODE_IMAGE_SEARCH})
     @Retention(RetentionPolicy.SOURCE)
     private @interface Mode {}
 
@@ -47,7 +47,8 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
     public static final int MODE_UPLOADER = 0x1;
     public static final int MODE_TAG = 0x2;
     public static final int MODE_WHATS_HOT = 0x3;
-    public static final int MODE_IMAGE_SEARCH = 0x4;
+    public static final int MODE_WHATS_NEW = 0x4;
+    public static final int MODE_IMAGE_SEARCH = 0x5;
 
     public static final int DEFAULT_ADVANCE = AdvanceSearchTable.SNAME | AdvanceSearchTable.STAGS;
     public static final int DEFAULT_MIN_RATING = 2;
@@ -469,6 +470,12 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
             }
             case MODE_IMAGE_SEARCH:
                 return EhUrl.getImageSearchUrl();
+            case MODE_WHATS_NEW:
+                StringBuilder sb = new StringBuilder(EhUrl.getLastestUrl());
+                if (mPageIndex != 0) {
+                    sb.append("&p=").append(mPageIndex + 1);
+                }
+                return sb.toString();
         }
     }
 

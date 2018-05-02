@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.hippo.ehviewer.client.EhUrl;
 import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.GalleryInfo;
 import com.hippo.ehviewer.client.exception.ParseException;
@@ -94,6 +95,10 @@ public class GalleryListParser {
 
     @Nullable
     private static GalleryInfo parseGalleryInfo(Element e) {
+        // Skip notice
+        if (e.hasClass("notice"))
+            return null;
+
         GalleryInfo gi = new GalleryInfo();
         // Get category
         Element ic = JsoupUtils.getElementByClass(e, "cat");
@@ -121,6 +126,9 @@ public class GalleryListParser {
                 gi.thumb = m.group(1);
                 gi.thumbWidth = 150;
                 gi.thumbHeight = 240;
+                if (!gi.thumb.startsWith("http")) {
+                    gi.thumb = EhUrl.getHost() + gi.thumb;
+                }
             } else {
                 Log.w(TAG, "Can't parse gallery info thumb url");
                 gi.thumb = "";
@@ -156,22 +164,6 @@ public class GalleryListParser {
         } else {
             Log.w(TAG, "Can't parse gallery info link 2");
             return null;
-        }
-        // Rating
-        Element it4r = JsoupUtils.getElementByClass(e, "it4r");
-        if (null != it4r) {
-            gi.rating = NumberUtils.parseFloatSafely(parseRating(it4r.attr("style")), -1.0f);
-        } else {
-            Log.w(TAG, "Can't parse gallery info rating");
-            gi.rating = -1.0f;
-        }
-        // Uploader
-        Element itu = JsoupUtils.getElementByClass(e, "itu");
-        if (null != itu) {
-            gi.uploader = itu.text().trim();
-        } else {
-            Log.w(TAG, "Can't parse gallery info uploader");
-            gi.uploader = "";
         }
 
         gi.generateSLang();
