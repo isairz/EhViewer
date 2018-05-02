@@ -404,7 +404,7 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
                 // Search key
                 if (mKeyword != null) {
                     try {
-                        ub.addQuery("f_search", URLEncoder.encode(mKeyword, "UTF-8"));
+                        ub.addQuery("keyword", URLEncoder.encode(mKeyword, "UTF-8"));
                         filter = true;
                     } catch (UnsupportedEncodingException e) {
                         // Empty
@@ -452,15 +452,18 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
                 return sb.toString();
             }
             case MODE_TAG: {
-                StringBuilder sb = new StringBuilder(EhUrl.getHost());
-                sb.append("tag/");
+                StringBuilder sb = new StringBuilder(EhUrl.getBoardAllUrl());
+                sb.append("&");
                 try {
-                    sb.append(URLEncoder.encode(mKeyword, "UTF-8"));
+                    String keyword = URLEncoder.encode(mKeyword, "UTF-8")
+                            .replace(URLEncoder.encode("장르:", "UTF-8"), "genre=")
+                            .replace(URLEncoder.encode("작가:", "UTF-8"), "author=");
+                    sb.append(keyword);
                 } catch (UnsupportedEncodingException e) {
                     // Empty
                 }
                 if (mPageIndex != 0) {
-                    sb.append('/').append(mPageIndex);
+                    sb.append("&p=").append(mPageIndex + 1);
                 }
                 return sb.toString();
             }
