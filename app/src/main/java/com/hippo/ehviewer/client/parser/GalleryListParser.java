@@ -98,9 +98,8 @@ public class GalleryListParser {
         // Get category
         Element ic = JsoupUtils.getElementByClass(e, "cat");
         if (null != ic) {
-            // TODO: Category
-//            gi.category = EhUtils.getCategory(ic.text().trim());
-//            gi.category = ic.text().trim();
+            String text = ic.text().trim();
+            gi.category = EhUtils.getCategory(text.substring(1, text.length() - 1));
         } else {
             Log.w(TAG, "Can't parse gallery info category");
             gi.category = EhUtils.UNKNOWN;

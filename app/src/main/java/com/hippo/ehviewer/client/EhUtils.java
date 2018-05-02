@@ -69,16 +69,13 @@ public class EhUtils {
             UNKNOWN };
 
     private static final String[][] CATEGORY_STRINGS = {
-            new String[] { "misc" },
-            new String[] { "doujinshi" },
-            new String[] { "manga" },
-            new String[] { "artistcg", "Artist CG Sets" },
-            new String[] { "gamecg", "Game CG Sets" },
-            new String[] { "imageset", "Image Sets" },
-            new String[] { "cosplay" },
-            new String[] { "asianporn", "Asian Porn" },
-            new String[] { "non-h" },
-            new String[] { "western" },
+            new String[] { "weekly", "주간" },
+            new String[] { "biweekly", "격주" },
+            new String[] { "monthly", "월간" },
+            new String[] { "occasionality", "격월/비정기" },
+            new String[] { "book", "단행본" },
+            new String[] { "completed", "완결" },
+            new String[] { "shortstory", "단편" },
             new String[] { "unknown" }
     };
 

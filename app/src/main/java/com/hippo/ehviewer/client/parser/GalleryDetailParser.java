@@ -102,7 +102,7 @@ public class GalleryDetailParser {
         GalleryDetail galleryDetail = new GalleryDetail();
         Document document = Jsoup.parse(body);
         parseDetail(galleryDetail, document, body);
-        galleryDetail.tags = EMPTY_GALLERY_TAG_GROUP_ARRAY; // parseTagGroups(document);
+        // galleryDetail.tags = EMPTY_GALLERY_TAG_GROUP_ARRAY; // parseTagGroups(document);
         galleryDetail.comments = EMPTY_GALLERY_COMMENT_ARRAY; // parseComments(document);
         galleryDetail.archives = parseArchives(document);
 //        galleryDetail.previewPages = parsePreviewPages(document, body);
@@ -159,16 +159,34 @@ public class GalleryDetailParser {
             gd.titleJpn = "";
 
             // Category
-            gd.category = EhUtils.UNKNOWN;
-
-            // Uploader
-            Elements ga = head.getElementsByAttributeValue("name", "author");
-            if (ga != null && ga.size() >= 1) {
-                gd.uploader = ga.first().attr("content");
+            Elements cat = head.getElementsByAttributeValue("name", "classification");
+            if (cat != null && cat.size() >= 1) {
+                String text = cat.first().attr("content");
+                gd.category = EhUtils.getCategory(text);
             } else {
-                gd.uploader = "";
+                gd.category = EhUtils.UNKNOWN;
             }
 
+            // Keyword
+            gd.uploader = "";
+            gd.tags = EMPTY_GALLERY_TAG_GROUP_ARRAY;
+            Elements gk = head.getElementsByAttributeValue("name", "keywords");
+            if (gk != null && gk.size() >= 1) {
+                String[] keywords = gk.first().attr("content").split(",");
+                GalleryTagGroup author = new GalleryTagGroup();
+                GalleryTagGroup genre = new GalleryTagGroup();
+                author.groupName = "작가";
+                genre.groupName = "장르";
+                for (String k : keywords) {
+                    if (k.startsWith("A:")) {
+                        author.addTag(k.substring(2));
+                    } else if (k.startsWith("G:")) {
+                        genre.addTag(k.substring(2));
+                    }
+                }
+
+                gd.tags = new GalleryTagGroup[]{author, genre};
+            }
 
             gd.posted = "";
             gd.parent = "";
