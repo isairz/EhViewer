@@ -799,6 +799,11 @@ public class DownloadManager implements SpiderQueen.OnSpiderListener {
     }
 
     @Override
+    public void onGetTitle(String title) {
+        // NOTHING
+    }
+
+    @Override
     public void onGet509(int index) {
         NotifyTask task = mNotifyTaskPool.pop();
         if (task == null) {

@@ -215,6 +215,14 @@ public final class SpiderQueen implements Runnable {
         }
     }
 
+    private void notifyTitle(String title) {
+        synchronized (mSpiderListeners) {
+            for (OnSpiderListener listener : mSpiderListeners) {
+                listener.onGetTitle(title);
+            }
+        }
+    }
+
     private void notifyGet509(int index) {
         synchronized (mSpiderListeners) {
             for (OnSpiderListener listener : mSpiderListeners) {
@@ -730,6 +738,7 @@ public final class SpiderQueen implements Runnable {
             String body = response.body().string();
 
             spiderInfo.pages = GalleryDetailParser.parsePages(body);
+            spiderInfo.titleNo = GalleryDetailParser.parseTitleNo(body);
             return spiderInfo;
         } catch (Exception e) {
             return null;
@@ -807,6 +816,9 @@ public final class SpiderQueen implements Runnable {
 
         // Notify get pages
         notifyGetPages(spiderInfo.pages.length);
+
+        // Notify Title
+        notifyTitle(spiderInfo.titleNo);
 
         // Ensure worker
         tryToEnsureWorkers();
@@ -1368,6 +1380,8 @@ public final class SpiderQueen implements Runnable {
     public interface OnSpiderListener {
 
         void onGetPages(int pages);
+
+        void onGetTitle(String title);
 
         void onGet509(int index);
 

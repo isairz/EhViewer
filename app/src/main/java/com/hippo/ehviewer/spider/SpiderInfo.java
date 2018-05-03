@@ -44,6 +44,7 @@ public class SpiderInfo {
     public long gid = -1;
     public String token = null;
     public String chapter = null;
+    public String titleNo = null;
     public String[] pages;
 
     public static SpiderInfo read(@Nullable UniFile file) {
@@ -122,6 +123,8 @@ public class SpiderInfo {
             spiderInfo.token = IOUtils.readAsciiLine(is);
             // Deprecated, mode, skip it
             IOUtils.readAsciiLine(is);
+            // TitleNo
+            spiderInfo.titleNo = IOUtils.readAsciiLine(is);
             // Pages
             int pages = Integer.parseInt(IOUtils.readAsciiLine(is));
             // Check pages
@@ -159,6 +162,8 @@ public class SpiderInfo {
             writer.write(token != null ? token : "");
             writer.write("\n");
             writer.write("1");
+            writer.write("\n");
+            writer.write(titleNo != null ? titleNo : "");
             writer.write("\n");
             writer.write(Integer.toString(pages.length));
             writer.write("\n");

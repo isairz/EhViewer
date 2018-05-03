@@ -108,6 +108,7 @@ public class GalleryActivity extends EhActivity implements SeekBar.OnSeekBarChan
     private Uri mUri;
     private GalleryInfo mGalleryInfo;
     private String mChapter;
+    private String mTitle;
     private int mPage;
     private String mCacheFileName;
 
@@ -538,7 +539,7 @@ public class GalleryActivity extends EhActivity implements SeekBar.OnSeekBarChan
         if (mSize <= 0 || mCurrentIndex < 0) {
             mProgress.setText(null);
         } else {
-            mProgress.setText((mCurrentIndex + 1) + "/" + mSize);
+            mProgress.setText(mTitle + " " + (mCurrentIndex + 1) + "/" + mSize);
         }
     }
 
@@ -962,6 +963,11 @@ public class GalleryActivity extends EhActivity implements SeekBar.OnSeekBarChan
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
             }
         }
+    }
+
+    public void setTitle(String title)
+    {
+        mTitle = title;
     }
 
     private void showPageDialog(final int page) {

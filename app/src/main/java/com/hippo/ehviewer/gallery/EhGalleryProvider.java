@@ -22,6 +22,7 @@ import android.support.annotation.Nullable;
 
 import com.hippo.ehviewer.client.data.GalleryInfo;
 import com.hippo.ehviewer.spider.SpiderQueen;
+import com.hippo.ehviewer.ui.GalleryActivity;
 import com.hippo.glgallery.GalleryProvider;
 import com.hippo.image.Image;
 import com.hippo.unifile.UniFile;
@@ -160,6 +161,11 @@ public class EhGalleryProvider extends GalleryProvider2 implements SpiderQueen.O
     @Override
     public void onGetPages(int pages) {
         notifyDataChanged();
+    }
+
+    @Override
+    public void onGetTitle(String title) {
+        ((GalleryActivity)mContext).setTitle(title);
     }
 
     @Override

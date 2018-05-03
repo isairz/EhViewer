@@ -65,6 +65,7 @@ public class GalleryDetailParser {
     private static final Pattern PATTERN_TAG = Pattern.compile("<div[^<>]+><a[^<>]+>([\\w\\s]+)</a></div>");
     private static final Pattern PATTERN_COMMENT = Pattern.compile("<div class=\"c3\">Posted on ([^<>]+) by: &nbsp; <a[^<>]+>([^<>]+)</a>.+?<div class=\"c6\"[^>]*>(.+?)</div><div class=\"c[78]\"");
     private static final Pattern PATTERN_PAGES = Pattern.compile("data-src=\"(.+)\"");
+    private static final Pattern PATTERN_TITLE_NO = Pattern.compile("<span class=\"title-no\">(.+)</span>");
     private static final Pattern PATTERN_PREVIEW_PAGES = Pattern.compile("<td[^>]+><a[^>]+>([\\d,]+)</a></td><td[^>]+>(?:<a[^>]+>)?&gt;(?:</a>)?</td>");
     private static final Pattern PATTERN_NORMAL_PREVIEW = Pattern.compile("<div class=\"gdtm\"[^<>]*><div[^<>]*width:(\\d+)[^<>]*height:(\\d+)[^<>]*\\((.+?)\\)[^<>]*-(\\d+)px[^<>]*><a[^<>]*href=\"(.+?)\"[^<>]*><img alt=\"([\\d,]+)\"");
     private static final Pattern PATTERN_LARGE_PREVIEW = Pattern.compile("data-src=\"(.+)\"");
@@ -506,6 +507,20 @@ public class GalleryDetailParser {
         }
 
         return urls.toArray(new String[urls.size()]);
+    }
+
+    /**
+     * Parse pages with regular expressions
+     */
+    public static String parseTitleNo(String body) throws ParseException {
+        List<String> urls = new ArrayList<String>();
+        Matcher m = PATTERN_TITLE_NO.matcher(body);
+
+        while (m.find()) {
+            return m.group(1);
+        }
+
+        return "";
     }
 
     public static PreviewSet parsePreviewSet(Document d, String body) throws ParseException {
