@@ -154,7 +154,7 @@ public class EhClient {
             try {
                 switch (mMethod) {
                     case METHOD_SIGN_IN:
-                        return EhEngine.signIn(this, mOkHttpClient, (String) params[0], (String) params[1], (String) params[2], (String) params[3]);
+                        return EhEngine.signIn(this, mOkHttpClient);
                     case METHOD_GET_GALLERY_LIST:
                         return EhEngine.getGalleryList(this, mOkHttpClient, (String) params[0]);
                     case METHOD_FILL_GALLERY_LIST_BY_API:

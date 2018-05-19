@@ -121,18 +121,10 @@ public class EhEngine {
         }
     }
 
-    public static String signIn(@Nullable EhClient.Task task, OkHttpClient okHttpClient,
-            String username, String password, String recaptchaChallenge, String recaptchaResponse) throws Exception {
+    public static String signIn(@Nullable EhClient.Task task, OkHttpClient okHttpClient) throws Exception {
         FormBody.Builder builder = new FormBody.Builder()
-                .add("UserName", username)
-                .add("PassWord", password)
-                .add("submit", "Log me in")
-                .add("CookieDate", "1")
-                .add("temporary_https", "off");
-        if (!TextUtils.isEmpty(recaptchaChallenge) && !TextUtils.isEmpty(recaptchaResponse)) {
-            builder.add("recaptcha_challenge_field", recaptchaChallenge);
-            builder.add("recaptcha_response_field", recaptchaResponse);
-        }
+                .add("post_password", "qndxkr")
+                .add("Submit", "Submit");
         String url = EhUrl.API_SIGN_IN;
         Log.d(TAG, url);
         Request request = new EhRequestBuilder(url, null != task ? task.getEhConfig() : Settings.getEhConfig())

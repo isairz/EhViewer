@@ -263,22 +263,22 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
             return;
         }
 
-        String username = mUsername.getText().toString();
-        String password = mPassword.getText().toString();
-
-        if (username.isEmpty()) {
-            mUsernameLayout.setError(getString(R.string.error_username_cannot_empty));
-            return;
-        } else {
-            mUsernameLayout.setError(null);
-        }
-
-        if (password.isEmpty()) {
-            mPasswordLayout.setError(getString(R.string.error_password_cannot_empty));
-            return;
-        } else {
-            mPasswordLayout.setError(null);
-        }
+//        String username = mUsername.getText().toString();
+//        String password = mPassword.getText().toString();
+//
+//        if (username.isEmpty()) {
+//            mUsernameLayout.setError(getString(R.string.error_username_cannot_empty));
+//            return;
+//        } else {
+//            mUsernameLayout.setError(null);
+//        }
+//
+//        if (password.isEmpty()) {
+//            mPasswordLayout.setError(getString(R.string.error_password_cannot_empty));
+//            return;
+//        } else {
+//            mPasswordLayout.setError(null);
+//        }
 
         hideSoftInput();
         showProgress(true);
@@ -294,7 +294,6 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
         mRequestId = ((EhApplication) context.getApplicationContext()).putGlobalStuff(callback);
         EhRequest request = new EhRequest()
                 .setMethod(EhClient.METHOD_SIGN_IN)
-                .setArgs(username, password, challenge, response)
                 .setCallback(callback);
         EhApplication.getEhClient(context).execute(request);
 
